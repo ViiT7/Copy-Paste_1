@@ -1,21 +1,23 @@
-# src/main.py
-
 import os
+import json
 import tkinter as tk
-from tkinter import filedialog, messagebox
+from tkinter import filedialog, messagebox, simpledialog
 from datetime import datetime
 
 class ConsolidadorDeArquivosApp:
     def __init__(self, root):
         self.root = root
         self.root.title("Consolidador de Arquivos")
-        self.root.geometry("800x600")
+        self.root.geometry("900x700")
         self.root.resizable(False, False)
 
         # Variáveis
         self.pasta_selecionada = tk.StringVar()
         self.nome_arquivo = tk.StringVar(value="consolidado.txt")
         self.exclusoes = []  # Lista para armazenar caminhos relativos a serem ignorados
+        self.presets = {}    # Dicionário para armazenar presets (nome: lista de exclusões)
+        self.presets_file = os.path.join(os.path.dirname(__file__), "presets.json")
+        self.load_presets_from_file()
 
         # Interface
         self.create_widgets()
@@ -62,15 +64,44 @@ class ConsolidadorDeArquivosApp:
         btn_remover_exclusao.pack(side='left', padx=5)
 
         # Listbox para mostrar exclusões
-        self.listbox_exclusao = tk.Listbox(frame_exclusao, selectmode=tk.SINGLE, width=100, height=20)
+        self.listbox_exclusao = tk.Listbox(frame_exclusao, selectmode=tk.SINGLE, width=100, height=10)
         self.listbox_exclusao.pack(side='left', padx=(0,5), fill='y')
 
         # Scrollbar para a Listbox
-        scrollbar = tk.Scrollbar(frame_exclusao, orient="vertical")
-        scrollbar.config(command=self.listbox_exclusao.yview)
-        scrollbar.pack(side='left', fill='y')
+        scrollbar_exclusao = tk.Scrollbar(frame_exclusao, orient="vertical")
+        scrollbar_exclusao.config(command=self.listbox_exclusao.yview)
+        scrollbar_exclusao.pack(side='left', fill='y')
 
-        self.listbox_exclusao.config(yscrollcommand=scrollbar.set)
+        self.listbox_exclusao.config(yscrollcommand=scrollbar_exclusao.set)
+
+        # Seção de Presets
+        frame_presets = tk.LabelFrame(self.root, text="Presets de Exclusão", padx=10, pady=10)
+        frame_presets.pack(fill='both', padx=10, pady=10, expand=True)
+
+        # Frame para Botões de Presets
+        frame_botoes_presets = tk.Frame(frame_presets)
+        frame_botoes_presets.pack(fill='x', pady=5)
+
+        btn_salvar_preset = tk.Button(frame_botoes_presets, text="Salvar Preset", command=self.salvar_preset, bg="#5bc0de", fg="white")
+        btn_salvar_preset.pack(side='left', padx=5)
+
+        btn_carregar_preset = tk.Button(frame_botoes_presets, text="Carregar Preset", command=self.carregar_preset, bg="#f0ad4e", fg="white")
+        btn_carregar_preset.pack(side='left', padx=5)
+
+        btn_excluir_preset = tk.Button(frame_botoes_presets, text="Excluir Preset", command=self.excluir_preset, bg="#d9534f", fg="white")
+        btn_excluir_preset.pack(side='left', padx=5)
+
+        # Listbox para mostrar presets salvos
+        self.listbox_presets = tk.Listbox(frame_presets, selectmode=tk.SINGLE, width=50, height=8)
+        self.listbox_presets.pack(side='left', padx=(0,5), fill='y')
+        self.atualizar_listbox_presets()
+
+        # Scrollbar para a Listbox de Presets
+        scrollbar_presets = tk.Scrollbar(frame_presets, orient="vertical")
+        scrollbar_presets.config(command=self.listbox_presets.yview)
+        scrollbar_presets.pack(side='left', fill='y')
+
+        self.listbox_presets.config(yscrollcommand=scrollbar_presets.set)
 
         # Botão de Consolidação
         frame_consolidar = tk.Frame(self.root, padx=10, pady=20)
@@ -95,7 +126,6 @@ class ConsolidadorDeArquivosApp:
         if caminho:
             caminho_relativo = os.path.relpath(caminho, self.pasta_selecionada.get())
             caminho_relativo = caminho_relativo.replace("\\", "/")
-            # Verifica se já está na lista
             if caminho_relativo not in self.exclusoes:
                 self.exclusoes.append(caminho_relativo)
                 self.listbox_exclusao.insert(tk.END, f"Arquivo: {caminho_relativo}")
@@ -111,7 +141,6 @@ class ConsolidadorDeArquivosApp:
         if caminho:
             caminho_relativo = os.path.relpath(caminho, self.pasta_selecionada.get())
             caminho_relativo = caminho_relativo.replace("\\", "/")
-            # Verifica se já está na lista
             if caminho_relativo not in self.exclusoes:
                 self.exclusoes.append(caminho_relativo)
                 self.listbox_exclusao.insert(tk.END, f"Pasta: {caminho_relativo}")
@@ -125,9 +154,9 @@ class ConsolidadorDeArquivosApp:
             return
         index = selecionado[0]
         exclusao = self.listbox_exclusao.get(index)
-        # Extrair o caminho relativo sem o prefixo "Arquivo: " ou "Pasta: "
         caminho_relativo = exclusao.split(": ", 1)[1]
-        self.exclusoes.remove(caminho_relativo)
+        if caminho_relativo in self.exclusoes:
+            self.exclusoes.remove(caminho_relativo)
         self.listbox_exclusao.delete(index)
 
     def consolidar_arquivos(self):
@@ -147,23 +176,18 @@ class ConsolidadorDeArquivosApp:
 
         try:
             with open(arquivo_saida, "w", encoding="utf-8") as outfile:
-                # Cabeçalho
                 data_hora = datetime.now().strftime("%d/%m/%y AS %H:%M")
                 outfile.write(f"ARQUIVOS DO PROJETO EM SEU ESTADO ATUAL ({data_hora}):\n\n")
                 outfile.write("-----------------\n\n")
 
-                # Percorrer arquivos
                 for root_dir, dirs, files in os.walk(pasta):
-                    # Calcular o caminho relativo da pasta atual
                     caminho_relativo_pasta = os.path.relpath(root_dir, pasta)
                     caminho_relativo_pasta = caminho_relativo_pasta.replace("\\", "/")
 
-                    # Verificar se a pasta atual está na lista de exclusões
                     if caminho_relativo_pasta != '.' and caminho_relativo_pasta in self.exclusoes:
-                        dirs[:] = []  # Não desce nas subpastas
+                        dirs[:] = []
                         continue
 
-                    # Remover subpastas da lista de exclusões
                     dirs[:] = [d for d in dirs if os.path.join(caminho_relativo_pasta, d).replace("\\", "/") not in self.exclusoes]
 
                     for file in files:
@@ -171,24 +195,93 @@ class ConsolidadorDeArquivosApp:
                         caminho_relativo = os.path.relpath(caminho_completo, pasta)
                         caminho_relativo = caminho_relativo.replace("\\", "/")
 
-                        # Verificar se o arquivo está na lista de exclusões
                         if caminho_relativo in self.exclusoes:
                             continue
 
                         outfile.write(f"{caminho_relativo} ->\n\n")
-
                         try:
                             with open(caminho_completo, "r", encoding="utf-8") as infile:
                                 conteudo = infile.read()
                                 outfile.write(conteudo + "\n\n")
                         except Exception as e:
                             outfile.write(f"Erro ao ler o arquivo: {e}\n\n")
-
                         outfile.write("-----------------\n\n")
 
             messagebox.showinfo("Sucesso", f"Arquivo consolidado criado em:\n{arquivo_saida}")
         except Exception as e:
             messagebox.showerror("Erro", f"Ocorreu um erro ao consolidar os arquivos:\n{e}")
+
+    # Funções de Presets
+    def salvar_preset(self):
+        if not self.exclusoes:
+            messagebox.showwarning("Aviso", "A lista de exclusões está vazia. Não há nada para salvar.")
+            return
+
+        nome_preset = simpledialog.askstring("Salvar Preset", "Digite um nome para este preset:")
+        if not nome_preset:
+            return
+
+        if nome_preset in self.presets:
+            if not messagebox.askyesno("Confirmar", f"Já existe um preset com o nome '{nome_preset}'. Deseja sobrescrevê-lo?"):
+                return
+
+        self.presets[nome_preset] = self.exclusoes.copy()
+        self.save_presets_to_file()
+        self.atualizar_listbox_presets()
+        messagebox.showinfo("Sucesso", f"Preset '{nome_preset}' salvo com sucesso.")
+
+    def carregar_preset(self):
+        selecionado = self.listbox_presets.curselection()
+        if not selecionado:
+            messagebox.showwarning("Aviso", "Por favor, selecione um preset para carregar.")
+            return
+        index = selecionado[0]
+        nome_preset = self.listbox_presets.get(index)
+        preset = self.presets.get(nome_preset, [])
+        self.exclusoes = preset.copy()
+        self.listbox_exclusao.delete(0, tk.END)
+        for item in self.exclusoes:
+            # Detecta se o item é arquivo ou pasta pelo padrão (pode ser melhorado se desejar)
+            # Aqui assumimos que o usuário salva os caminhos sem prefixo, e na listbox adicionamos o prefixo conforme o tipo.
+            # Como não armazenamos o tipo, vamos exibir como "Arquivo/Pasta: " seguido do caminho.
+            self.listbox_exclusao.insert(tk.END, f"Preset: {item}")
+        messagebox.showinfo("Sucesso", f"Preset '{nome_preset}' carregado.")
+
+    def excluir_preset(self):
+        selecionado = self.listbox_presets.curselection()
+        if not selecionado:
+            messagebox.showwarning("Aviso", "Por favor, selecione um preset para excluir.")
+            return
+        index = selecionado[0]
+        nome_preset = self.listbox_presets.get(index)
+        if messagebox.askyesno("Confirmar", f"Tem certeza que deseja excluir o preset '{nome_preset}'?"):
+            del self.presets[nome_preset]
+            self.save_presets_to_file()
+            self.atualizar_listbox_presets()
+            messagebox.showinfo("Sucesso", f"Preset '{nome_preset}' excluído.")
+
+    def atualizar_listbox_presets(self):
+        self.listbox_presets.delete(0, tk.END)
+        for nome in self.presets.keys():
+            self.listbox_presets.insert(tk.END, nome)
+
+    def load_presets_from_file(self):
+        if os.path.exists(self.presets_file):
+            try:
+                with open(self.presets_file, "r", encoding="utf-8") as infile:
+                    self.presets = json.load(infile)
+            except Exception as e:
+                messagebox.showerror("Erro", f"Erro ao carregar os presets: {e}")
+                self.presets = {}
+        else:
+            self.presets = {}
+
+    def save_presets_to_file(self):
+        try:
+            with open(self.presets_file, "w", encoding="utf-8") as outfile:
+                json.dump(self.presets, outfile, indent=4)
+        except Exception as e:
+            messagebox.showerror("Erro", f"Erro ao salvar os presets: {e}")
 
 if __name__ == "__main__":
     root = tk.Tk()

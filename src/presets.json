@@ -1,0 +1,14 @@
+{
+    "FRONT_CRONO_1": [
+        ".git",
+        "node_modules",
+        "backend/node_modules",
+        "frontend/node_modules",
+        "frontend/public/fonts",
+        "frontend/public/images",
+        "frontend/src/assets",
+        "package-lock.json",
+        "backend/package-lock.json",
+        "frontend/package-lock.json"
+    ]
+}
