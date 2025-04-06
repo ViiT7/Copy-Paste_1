@@ -10,5 +10,110 @@
         "package-lock.json",
         "backend/package-lock.json",
         "frontend/package-lock.json"
+    ],
+    "FORMS_DOUBLE_1": [
+        ".git",
+        "node_modules",
+        "public/images",
+        "styles",
+        "package-lock.json",
+        "git commit -m Adicionada logo da empresa ao formul\u00e1rio",
+        ".gitignore",
+        "public/styles"
+    ],
+    "CADASTRO_EMPRESAS_IA_1": [
+        "node_modules",
+        "package-lock.json",
+        ".git"
+    ],
+    "TXB_V1": [
+        "backend/node_modules"
+    ],
+    "txb_v2": [
+        "backend/node_modules",
+        ".git",
+        "backend/package-lock.json"
+    ],
+    "txb_v3": [
+        "backend/node_modules",
+        ".git",
+        "backend/package-lock.json",
+        "frontend/src/assets",
+        "frontend/public",
+        "README.md"
+    ],
+    "TXB_V4": [
+        "backend/node_modules",
+        ".git",
+        "backend/package-lock.json",
+        "frontend/src/assets",
+        "frontend/public",
+        "README.md",
+        "frontend/src/components/icons"
+    ],
+    "txb_v5": [
+        "backend/node_modules",
+        ".git",
+        "backend/package-lock.json",
+        "frontend/src/assets",
+        "frontend/public",
+        "README.md",
+        "frontend/src/components/icons",
+        "frontend/node_modules"
+    ],
+    "TXB_PRODUTOS_1": [
+        "backend/node_modules",
+        ".git",
+        "backend/package-lock.json",
+        "frontend/src/assets",
+        "frontend/public",
+        "README.md",
+        "frontend/src/components/icons",
+        "frontend/node_modules",
+        "frontend/src/pages/Clientes.css",
+        "frontend/src/pages/Produtos.css",
+        "frontend/src/pages/Relatorios.css",
+        "frontend/src/pages/Representantes.css",
+        "frontend/src/App.css",
+        "frontend/src/index.css"
+    ],
+    "ROTAS-CONTROLLERxSERVICES": [
+        "README.md",
+        ".gitignore",
+        ".git",
+        "frontend/node_modules",
+        "frontend/public",
+        "frontend/.env.development",
+        "frontend/.env.production",
+        "frontend/.gitignore",
+        "frontend/eslint.config.js",
+        "frontend/index.html",
+        "frontend/package.json",
+        "frontend/package-lock.json",
+        "frontend/README.md",
+        "frontend/vite.config.js",
+        "frontend/src/assets",
+        "frontend/src/components",
+        "frontend/src/pages",
+        "frontend/src/App.css",
+        "frontend/src/App.jsx",
+        "frontend/src/index.css",
+        "frontend/src/main.jsx",
+        "backend/config",
+        "backend/node_modules",
+        "backend/.env",
+        "backend/package.json",
+        "backend/package-lock.json",
+        "backend/server.js"
+    ],
+    "Vers\u00e3o V0_dockfy": [
+        "public",
+        "backend/node_modules",
+        "pnpm-lock.yaml",
+        "node_modules",
+        "backend/pnpm-lock.yaml",
+        "backend/logs",
+        ".git",
+        ".next"
     ]
 }
